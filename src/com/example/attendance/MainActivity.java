@@ -27,8 +27,8 @@ import org.json.JSONObject;
 
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -41,44 +41,75 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnClickListener {
 	
 	AlertDialog.Builder builder;
 	ListView lv;
-	ArrayList<String> list = new ArrayList<String>();
-	ArrayList<String> stat = new ArrayList<String>();
-	ArrayList<String> names = new ArrayList<String>();
-	ArrayList<String> numberr = new ArrayList<String>();
-	ArrayList<String> idnumber = new ArrayList<String>();
 	ArrayAdapter<String> adapter;
 	EditText studentName, idNumber, txtSearch;
 	private String id;
 	private String name;
+	private String status = "PRESENT";
 	private AdapterContextMenuInfo info;
 	boolean editFlag;
 	boolean presentFlag;
 	boolean absentFlag;
 	private String pid;
 	private String primaryId;
+	ArrayList<String> list = new ArrayList<String>();
+	ArrayList<String> stat = new ArrayList<String>();
+	ArrayList<String> names = new ArrayList<String>();
+	ArrayList<String> numberr = new ArrayList<String>();
+	ArrayList<String> idnumber = new ArrayList<String>();
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
         this.lv = (ListView) this.findViewById(R.id.listView1);
 		this.txtSearch = (EditText) this.findViewById(R.id.editText1);
-		this.adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
+		this.adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list){
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				TextView tv = (TextView) super.getView(position, convertView, parent);
+				if(status.equals(stat.get(position))){
+					tv.setBackgroundResource(R.color.green);
+					
+				}
+				else{
+					tv.setBackgroundResource(R.color.red);
+				}
+				return super.getView(position, convertView, parent);
+			}
+			
+		};
 		this.lv.setAdapter(adapter);
-		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-		StrictMode.setThreadPolicy(policy);
+		final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				if((id == null && name == null) || !names.isEmpty()){
+					Students();
+				}
+				handler.postDelayed(this, 60 * 10);
+			}
+		}, 60 * 10);
+		
 		this.txtSearch.addTextChangedListener(new TextWatcher() {
 			
 			@Override
@@ -111,7 +142,7 @@ public class MainActivity extends Activity implements OnClickListener {
     	switch(id){
     		case R.id.DELETE:
     			String num = numberr.get(this.info.position);
-    			Toast.makeText(this, num, Toast.LENGTH_SHORT).show();
+    			//Toast.makeText(this, num, Toast.LENGTH_SHORT).show();
     			this.deleteStudent(num);
     			break;
     		case R.id.EDIT:
@@ -181,7 +212,7 @@ public class MainActivity extends Activity implements OnClickListener {
         else{
         	menu.findItem(R.id.PRESENT).setVisible(false);
         }
-        Toast.makeText(this, test, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, test, Toast.LENGTH_SHORT).show();
 		super.onCreateContextMenu(menu, v, menuInfo);
 	}
 
@@ -215,7 +246,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 	
 	private void deleteStudent(String num){
-		String url = "http://192.168.0.57/attendance_server/deleteStudent.php";
+		String url = "http://192.168.254.105/attendance_server/deleteStudent.php";
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost= new HttpPost(url);
 		List<NameValuePair> namevaluepairs = new ArrayList<NameValuePair>(1);
@@ -249,7 +280,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			numberr.clear();
 			list.clear();
 			stat.clear();
-			URL url = new URL("http://192.168.0.57/attendance_server/students.php");
+			idnumber.clear();
+			URL url = new URL("http://192.168.254.105/attendance_server/students.php");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			InputStream is = conn.getInputStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -298,10 +330,10 @@ public class MainActivity extends Activity implements OnClickListener {
 					this.id = this.idNumber.getText().toString();
 					this.name = this.studentName.getText().toString();
 					this.pid = this.primaryId;
-					String url = "http://192.168.0.57/attendance_server/editStudent.php";
-					Toast.makeText(this, this.name, Toast.LENGTH_SHORT).show();
-					Toast.makeText(this, this.id, Toast.LENGTH_SHORT).show();
-					Toast.makeText(this, this.pid, Toast.LENGTH_SHORT).show();
+					String url = "http://192.168.254.105/attendance_server/editStudent.php";
+					//Toast.makeText(this, this.name, Toast.LENGTH_SHORT).show();
+					//Toast.makeText(this, this.id, Toast.LENGTH_SHORT).show();
+					//Toast.makeText(this, this.pid, Toast.LENGTH_SHORT).show();
 					HttpClient httpClient = new DefaultHttpClient();
 					HttpPost httpPost= new HttpPost(url);
 					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
@@ -332,8 +364,8 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 				else if(this.presentFlag){
 					this.pid = this.primaryId;
-					String url = "http://192.168.0.57/attendance_server/studentPresent.php";
-					Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
+					String url = "http://192.168.254.105/attendance_server/studentPresent.php";
+					//Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
 					HttpClient httpClient = new DefaultHttpClient();
 					HttpPost httpPost= new HttpPost(url);
 					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
@@ -362,8 +394,8 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 				else if(this.absentFlag){
 					this.pid = this.primaryId;
-					String url = "http://192.168.0.57/attendance_server/studentAbsent.php";
-					Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
+					String url = "http://192.168.254.105/attendance_server/studentAbsent.php";
+					//Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
 					HttpClient httpClient = new DefaultHttpClient();
 					HttpPost httpPost= new HttpPost(url);
 					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
@@ -396,8 +428,8 @@ public class MainActivity extends Activity implements OnClickListener {
 					if(!this.id.isEmpty() && !this.name.isEmpty()){
 						Log.d("name", this.name);
 						Log.d("id", this.id);
-						String url = "http://192.168.0.57/attendance_server/addStudent.php";
-						Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
+						String url = "http://192.168.254.105/attendance_server/addStudent.php";
+						//Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
 						HttpClient httpClient = new DefaultHttpClient();
 						HttpPost httpPost= new HttpPost(url);
 						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
