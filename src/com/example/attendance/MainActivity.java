@@ -105,7 +105,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				// TODO Auto-generated method stub
 				if((id == null && name == null) || !names.isEmpty()){
 					Students();
-				}
+			}
 				handler.postDelayed(this, 60 * 10);
 			}
 		}, 60 * 10);
@@ -139,14 +139,22 @@ public class MainActivity extends Activity implements OnClickListener {
     
 	public boolean onContextItemSelected(MenuItem item) {
     	int id = item.getItemId();
+    	this.presentFlag = false;
+    	this.editFlag = false;
+    	this.absentFlag = false;
     	switch(id){
     		case R.id.DELETE:
+    			this.presentFlag = false;
+    			this.absentFlag = false;
+    			this.editFlag = false;
     			String num = numberr.get(this.info.position);
     			//Toast.makeText(this, num, Toast.LENGTH_SHORT).show();
     			this.deleteStudent(num);
     			break;
     		case R.id.EDIT:
     			this.editFlag = true;
+    			this.presentFlag = false;
+    			this.absentFlag = false;
     			AlertDialog.Builder alert = new AlertDialog.Builder(this);
     			alert.setTitle(names.get(this.info.position));
     			LinearLayout layout = new LinearLayout(this);
@@ -166,6 +174,7 @@ public class MainActivity extends Activity implements OnClickListener {
     		case R.id.PRESENT:
     			this.presentFlag = true;
     			this.absentFlag = false;
+    			this.editFlag = false;
     			AlertDialog.Builder alertt = new AlertDialog.Builder(this);
     			this.primaryId = numberr.get(this.info.position);
     			LinearLayout layoutt = new LinearLayout(this);
@@ -180,6 +189,7 @@ public class MainActivity extends Activity implements OnClickListener {
     		case R.id.ABSENT:
     			this.presentFlag = false;
     			this.absentFlag = true;
+    			this.editFlag = false;
     			AlertDialog.Builder alerttt = new AlertDialog.Builder(this);
     			this.primaryId = numberr.get(this.info.position);
     			LinearLayout layouttt = new LinearLayout(this);
@@ -228,6 +238,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// TODO Auto-generated method stub
 		this.editFlag = false;
+		this.absentFlag = false;
+		this.presentFlag = false;
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		alert.setTitle("Add Student");
 		LinearLayout layout = new LinearLayout(this);
@@ -246,7 +258,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 	
 	private void deleteStudent(String num){
-		String url = "http://192.168.254.105/attendance_server/deleteStudent.php";
+		String url = "http://192.168.43.52/attendance_server/deleteStudent.php";
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost= new HttpPost(url);
 		List<NameValuePair> namevaluepairs = new ArrayList<NameValuePair>(1);
@@ -281,7 +293,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			list.clear();
 			stat.clear();
 			idnumber.clear();
-			URL url = new URL("http://192.168.254.105/attendance_server/students.php");
+			URL url = new URL("http://192.168.43.52/attendance_server/students.php");
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			InputStream is = conn.getInputStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -330,7 +342,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					this.id = this.idNumber.getText().toString();
 					this.name = this.studentName.getText().toString();
 					this.pid = this.primaryId;
-					String url = "http://192.168.254.105/attendance_server/editStudent.php";
+					String url = "http://192.168.43.52/attendance_server/editStudent.php";
 					//Toast.makeText(this, this.name, Toast.LENGTH_SHORT).show();
 					//Toast.makeText(this, this.id, Toast.LENGTH_SHORT).show();
 					//Toast.makeText(this, this.pid, Toast.LENGTH_SHORT).show();
@@ -364,7 +376,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 				else if(this.presentFlag){
 					this.pid = this.primaryId;
-					String url = "http://192.168.254.105/attendance_server/studentPresent.php";
+					String url = "http://192.168.43.52/attendance_server/studentPresent.php";
 					//Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
 					HttpClient httpClient = new DefaultHttpClient();
 					HttpPost httpPost= new HttpPost(url);
@@ -394,7 +406,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 				else if(this.absentFlag){
 					this.pid = this.primaryId;
-					String url = "http://192.168.254.105/attendance_server/studentAbsent.php";
+					String url = "http://192.168.43.52/attendance_server/studentAbsent.php";
 					//Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
 					HttpClient httpClient = new DefaultHttpClient();
 					HttpPost httpPost= new HttpPost(url);
@@ -428,7 +440,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					if(!this.id.isEmpty() && !this.name.isEmpty()){
 						Log.d("name", this.name);
 						Log.d("id", this.id);
-						String url = "http://192.168.254.105/attendance_server/addStudent.php";
+						String url = "http://192.168.43.52/attendance_server/addStudent.php";
 						//Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
 						HttpClient httpClient = new DefaultHttpClient();
 						HttpPost httpPost= new HttpPost(url);
@@ -456,13 +468,14 @@ public class MainActivity extends Activity implements OnClickListener {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+						this.Students();
+						break;
 					}
 				
 					else{
 						Toast.makeText(this, "ERROR", Toast.LENGTH_SHORT).show();
 					}
-					this.Students();
-					break;
+				
 				}
 				
 			case AlertDialog.BUTTON_NEGATIVE:
@@ -475,6 +488,6 @@ public class MainActivity extends Activity implements OnClickListener {
 
 
 	
-    
+
 
 
